@@ -53,6 +53,7 @@ python video_slicer.py -i "./Multihateclip/Chinese/video/train" -o "./Multihatec
 python video_to_audio.py -i "./Multihateclip/Chinese/video/train" -o "./Multihateclip/Chinese/audio/train"
 python extract_emotion.py -i "./Multihateclip/Chinese/"
 ```
+After preprocessing, a complete `annotation(new).json` file will be generated.
 4. Generate MLLM rationale with CoT
 ```bash
 python CoT.py --dataset_name Multihateclip --language Chinese
