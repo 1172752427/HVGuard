@@ -65,3 +65,4 @@ python frames_embedding.py
 python text_embedding.py
 ```
 7. Train and predict(same as Quick Start)
+123
