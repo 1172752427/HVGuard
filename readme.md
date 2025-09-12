@@ -8,10 +8,12 @@ HVGuard is a multimodal content safety framework that leverages **text (BERT)**,
 
 ## 📂 Project Structure
 
-- `embeddings/` – Cached multimodal embeddings (`.pth` files). No additional feature extraction is required during training.  
 - `datasets/` – Original dataset contents.  
-  - `annotation(new).json`: Cleaned and re-transcribed annotations.  
+  - `annotation(new).json`: Cleaned and re-transcribed annotations. 
+- `embeddings/` – Cached multimodal embeddings (`.pth` files). No additional feature extraction is required during training.  
+- `models/` – Saved models. 
 - `HVGuard.py` – Main training and inference script.  
+- `CoT.py` – CoT reasoning module script. 
 - `config.jsonl` – Configuration file for experiments.  
 
 ---
@@ -24,24 +26,41 @@ Make sure you have Python ≥3.8 and install the required packages:
 pip install -r requirements.txt
 ```
 
-### Step 2. Run training / prediction
-To start training on a dataset:
+### Step 2. Quick Start (Using Cached Embeddings)
+If you only want to reproduce results, you can directly predict using the pre-extracted embeddings.  
 ```bash
-python HVGuard.py --dataset_name Multihateclip --language Chinese --num_classes 2 --mode train
-```
-Available command-line arguments:
-```bash
-parser.add_argument('--dataset_name', type=str, default='Multihateclip', 
-    choices=['Multihateclip', 'HateMM'], help='Dataset name')
-
-parser.add_argument('--language', type=str, default='English', 
-    choices=['Chinese', 'English'], help='Language of the dataset')
-
-parser.add_argument('--num_classes', type=int, default=2, 
-    choices=[2, 3], help='Number of classes for classification')
-
-parser.add_argument('--mode', type=str, default='predict', 
-    choices=['train', 'predict'], help='Training mode or prediction mode')
+python HVGuard.py --dataset_name Multihateclip --language Chinese --num_classes 2 --mode predict
 ```
 - Use `--mode predict` to directly reproduce results from cached embeddings.  
-- To test with multiple random seeds, modify `random_state` inside `HVGuard.py`.  
+
+### step 3. Full Pipeline
+If you want to reproduce results from scratch, please follow these steps:
+
+1. Download datasets
+- [HateMM](https://github.com/hate-alert/HateMM)  
+- [MultiHateClip](https://github.com/Social-AI-Studio/MultiHateClip)  
+Place them into the `./dataset/` folder.
+
+2. Deploy models locally
+- BERT
+- ViT
+- Wav2Vec
+- FunASR
+  
+3. Preprocess datasets
+``` bash
+python video_slicer.py -i "./Multihateclip/Chinese/video/train" -o "./Multihateclip/Chinese/frames/train" --num_frames 32
+python video_to_audio.py -i "./Multihateclip/Chinese/video/train" -o "./Multihateclip/Chinese/audio/train"
+python extract_emotion.py -i "./Multihateclip/Chinese/"
+```
+4. Generate MLLM rationale with CoT
+```bash
+python CoT.py --dataset_name Multihateclip --language Chinese
+```
+6. Extract embeddings
+```bash
+python audio_embedding.py
+python frames_embedding.py
+python text_embedding.py
+```
+7. Train and predict(same as Quick Start)

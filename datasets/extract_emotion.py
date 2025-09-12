@@ -87,24 +87,32 @@ def process_audio_folder(model, folder_path, output_json, title_path, label_path
     with open(output_json, 'w', encoding='utf-8') as json_file:
         json.dump(results, json_file, ensure_ascii=False, indent=4)
 
+def parse_args():
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Extract emotion from videos in a folder.")
+    parser.add_argument("-i", "--input_folder", type=str, required=True,
+                        help="Path to the input folder containing videos.")
+
+    return parser.parse_args()
 
 def main():
     model = "FunAudioLLM/SenseVoiceSmall"
     base_path = f'./HateMM' # (Multihateclip, HateMM)
     model = load_model(model)
+    target = ["valid", "test", "train"]
 
-    target1 = ["Chinese_data", "English_data"]
-    target2 = ["valid", "test", "train"]
-    
-    for i in target1:
-        for j in target2:
-            folder_path = base_path + i + "/audios/" + j
-            output_json = base_path + i + "/annotation(new)"  + ".json"
-            title_path = base_path + i + "/text.json"
-            label_path = base_path + i + "/annotation/" + j + ".tsv"
-            frames_path = base_path + i + "/frames/" + j + "/"
-            process_audio_folder(model, folder_path, output_json, title_path, label_path, frames_path)
-        print(f"Emotion analysis results saved to {output_json}")
+    args = parse_args()
+    base_path = args.input_folder
+    for i in target:
+        folder_path = base_path + "audios/" + i
+        output_json = base_path + "annotation(new)"  + ".json"
+        title_path = base_path + "text.json"
+        label_path = base_path + "annotation/" + i + ".tsv"
+        frames_path = base_path +  "frames/" + i + "/"
+        process_audio_folder(model, folder_path, output_json, title_path, label_path, frames_path)
+    print(f"Emotion analysis results saved to {output_json}")
 
 if __name__ == "__main__":
     main()
